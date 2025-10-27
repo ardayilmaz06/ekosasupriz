@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beni Affediyor Musun?</title>
+    
+    <style>
+        body {
+            /* Başlangıçta arka plan rengi */
+            background-color: #f7f3f1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 1s ease-in-out; 
+        }
+
+        /* ------------------ VIDEO ARKA PLANI CSS'i ------------------ */
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            
+            /* VİDEONUN EKRANI TAM KAPLAMASINI SAĞLAYAN KRİTİK AYARLAR */
+            min-width: 100% ; 
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            /* -------------------------------------------------------- */
+            
+            z-index: -100; /* En arkada kalması için */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease-in-out; /* Yumuşak geçiş */
+        }
+
+        /* TIKLANDIKTAN SONRA AKTİF OLACAK SINIFLAR */
+        .video-active #video-background {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Video üzerindeki karartma katmanı */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); 
+            z-index: -99;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease-in-out;
+        }
+        .video-active .video-overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* ----------------------------------------------------------- */
+
+
+        .container {
+            text-align: center;
+            padding: 30px;
+            /* Tıklandıktan sonra şeffaflaşacak */
+            background: white; 
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 600px;
+            transition: background 1.5s;
+        }
+
+        /* "Evet" sonrası container arka planını hafif şeffaflaştıralım */
+        .video-active .container {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #e91e63;
+            margin-bottom: 30px;
+        }
+
+        .buttons-area {
+            margin-top: 40px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 5;
+        }
+
+        #yesBtn {
+            background-color: #e91e63;
+            color: white;
+            transform: scale(1.5);
+            margin-right: 40px;
+        }
+
+        #noBtn {
+            background-color: #f0f0f0;
+            color: #555;
+            position: absolute; /* Hareket etmesi için mutlak/sabit konumda olmalı */
+            top: 0;
+            left: 55%;
+            transition: all 0.5s ease-out;
+        }
+
+        /* Cevap mesajı alanı */
+        #affirmationMessage {
+            background-color: #ffccbc;
+            padding: 30px;
+            margin-top: 40px;
+            border-radius: 10px;
+            color: #4e342e;
+            animation: fadeIn 1s ease-in-out;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-overlay"></div>
+    <video muted loop id="video-background">
+      <source src="arka_plan_video (2).mp4" type="video/mp4">
+      Tarayıcınız video etiketini desteklemiyor.
+    </video>
+
+    <div class="container">
+        <h1>Beni Affediyor musun? 🥺</h1>
+
+        <div class="buttons-area" id="buttonsArea">
+            <button id="yesBtn" onclick="showAffirmation()">Evet ❤️</button>
+            <button id="noBtn">Hayır 🥲</button>
+        </div>
+        
+        <div id="affirmationMessage" class="hidden">
+            <h2>Teşekkürler, Ekooss!</h2>
+            <p>Kalbimi kırdım, farkındayım. Ama sensiz hayatımın bir anlamı yok. affettiğin İçin Teşekkür Ederim.</p>
+            <p>Beni affettiğin için minnettarım. Seninle birlikte daha güzel yarınlara yürüyeceğiz.</p>
+            <p>Sapsal maymununn...</p>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const affirmationMessage = document.getElementById('affirmationMessage');
+        const buttonsArea = document.getElementById('buttonsArea');
+        const videoBackground = document.getElementById('video-background');
+
+        // "Hayır" düğmesi üzerine gelindiğinde çalışacak fonksiyon
+        noBtn.addEventListener('mouseover', function() {
+            // Rastgele yeni bir konum hesapla (ekran sınırları içinde)
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            
+            // Konum hesaplaması yaparken butonun tamamen görünmesini sağlamak için boyutunu çıkarıyoruz
+            const newX = Math.random() * (viewportWidth - btnWidth * 1.5);
+            const newY = Math.random() * (viewportHeight - btnHeight * 1.5);
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
+        });
+
+        // "Evet" düğmesine tıklandığında çalışacak fonksiyon
+        function showAffirmation() {
+            // Düğmeleri gizle
+            buttonsArea.classList.add('hidden');
+            
+            // Mesajı göster
+            affirmationMessage.classList.remove('hidden');
+
+            // ------------------ VİDEO AKTİVASYONU ------------------
+            // 1. Video'yu oynat
+            // Not: Tarayıcılar video.play() komutunu yalnızca bir kullanıcı etkileşimi (tıklama) sonrası kabul eder.
+            videoBackground.play();
+            
+            // 2. Video ve overlay görünür hale gelsin (CSS geçişiyle)
+            document.body.classList.add('video-active');
+
+            // 3. Başlangıçtaki düz arka plan rengini kaldır (video görülmesi için)
+            document.body.style.backgroundColor = 'transparent'; 
+            // --------------------------------------------------------
+        }
+    </script>
+</body>
+</html>
